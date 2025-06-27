@@ -1,4 +1,5 @@
-import React, { CSSProperties } from "react";
+import React from "react";
+import type { CSSProperties } from "react";
 import { scaleBand, scaleLinear, max } from "d3";
 
 const dataExample = [
@@ -19,8 +20,15 @@ const dataExample = [
 
 const PX_BETWEEN_BARS = 5;
 
-export function BarChartMultiVertical() {
-  const data = dataExample;
+export interface BarChartMultiVerticalDatum {
+  key: string;
+  values: number[];
+}
+
+export function BarChartMultiVertical({ data = dataExample }: { data?: BarChartMultiVerticalDatum[] }) {
+  if (!data || data.length === 0 || !data[0] || !Array.isArray(data[0].values)) {
+    return <div className="h-72 flex items-center justify-center text-gray-400">No data available</div>;
+  }
   const numBars = data[0].values.length; // Get the number of bars
 
   // Upkey scales
@@ -138,7 +146,7 @@ export function BarChartMultiVertical() {
                     );
                   })}
                 </div>
-                                                  ))}
+          ))}
           {/* X Axis (Labels) */}
           {data.map((entry, i) => {
             const xPosition = xScale(entry.key)! + xScale.bandwidth() / 2;

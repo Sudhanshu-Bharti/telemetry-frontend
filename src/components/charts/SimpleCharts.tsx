@@ -5,6 +5,9 @@ import {
   YAxis,
   ResponsiveContainer,
   Tooltip,
+  BarChart,
+  Bar,
+  CartesianGrid,
 } from "recharts";
 import { format } from "date-fns";
 import { getBrowserIcon, getOSIcon } from "../../assets/icons";
@@ -650,6 +653,71 @@ export function CountryStats({ data, title }: CountryStatsProps) {
             <p className="text-sm">No country data available</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+interface StackedBarChartDatum {
+  date: Date;
+  bounce: number;
+  nonBounce: number;
+}
+
+interface StackedBarChartProps {
+  data: StackedBarChartDatum[];
+  title?: string;
+}
+
+export function StackedBarChart({ data, title }: StackedBarChartProps) {
+  // Detect if all dates are the same day (hourly data)
+  const isHourly = data.length > 0 && data.every(d =>
+    d.date.getFullYear() === data[0].date.getFullYear() &&
+    d.date.getMonth() === data[0].date.getMonth() &&
+    d.date.getDate() === data[0].date.getDate()
+  );
+  const formattedData = data.map((item) => ({
+    ...item,
+    displayDate: isHourly ? format(item.date, "haaa").replace(':00', '') : format(item.date, "MMM d"),
+  }));
+
+  return (
+    <div className="bg-white border border-gray-100 rounded-lg p-6">
+      {title && <h3 className="text-base font-semibold text-gray-900 mb-4">{title}</h3>}
+      <div className="h-80">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="displayDate"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: "#64748b", fontWeight: 400 }}
+              className="text-xs"
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 11, fill: "#64748b", fontWeight: 400 }}
+              className="text-xs"
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "white",
+                border: "1px solid #e2e8f0",
+                borderRadius: "8px",
+                boxShadow:
+                  "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+                fontSize: "12px",
+                color: "#1e293b",
+              }}
+              formatter={(value, name) => [value, name === "bounce" ? "Bounce Sessions" : "Non-Bounce Sessions"]}
+              labelFormatter={(label) => `${label}`}
+            />
+            <Bar dataKey="bounce" stackId="a" fill="#B89DFB" name="Bounce Sessions" />
+            <Bar dataKey="nonBounce" stackId="a" fill="#e7deff" name="Non-Bounce Sessions" />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

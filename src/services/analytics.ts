@@ -75,6 +75,8 @@ export interface VisitorsTrendData {
 export interface BounceRateTrendData {
   date: string;
   bounceRate: number;
+  bounceSessions: number;
+  totalSessions: number;
 }
 
 export class AnalyticsService {

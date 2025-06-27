@@ -17,7 +17,7 @@ import { DateRangePicker } from "../components/DateRangePickerModern";
 import { StatCard } from "../components/ui/StatCard";
 import { Eye, Users, AlertTriangle, Clock } from "lucide-react";
 import { Tabs } from "../components/ui/Tabs";
-import { SimpleLineChart, HorizontalBarChart, SimpleBarChart } from "../components/charts/SimpleCharts";
+import { SimpleLineChart, HorizontalBarChart, SimpleBarChart, StackedBarChart } from "../components/charts/SimpleCharts";
 import WorldMap from "../components/charts/WorldMap";
 import { CountryStats } from "../components/charts/CountryStats";
 import { getAlpha3 } from "../lib/alpha2toalpha3";
@@ -295,13 +295,36 @@ export function AnalyticsDashboard() {
       value: item.uniqueVisitors ?? item.count ?? 0,
     })).sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [visitorsTrend]);
-  const bounceRateChartData = useMemo(() => {
-    return bounceRateTrend.map(item => ({
-      date: new Date(item.date),
-      value: item.bounceRate,
-    })).sort((a, b) => a.date.getTime() - b.date.getTime());
-  }, [bounceRateTrend]);
-
+  const bounceRateStackedBarData = useMemo(() => {
+    if (isSameDay(startDate, endDate)) {
+      // Group by hour for single day
+      const groupedByHour: { [hour: string]: { date: Date; bounce: number; nonBounce: number } } = {};
+      for (let hour = 0; hour < 24; hour++) {
+        const hourLabel = `${hour}:00`;
+        groupedByHour[hourLabel] = {
+          date: new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), hour),
+          bounce: 0,
+          nonBounce: 0,
+        };
+      }
+      bounceRateTrend.forEach(item => {
+        const hour = new Date(item.date).getHours();
+        const hourLabel = `${hour}:00`;
+        if (groupedByHour[hourLabel]) {
+          groupedByHour[hourLabel].bounce += item.bounceSessions;
+          groupedByHour[hourLabel].nonBounce += (item.totalSessions - item.bounceSessions);
+        }
+      });
+      return Object.values(groupedByHour);
+    } else {
+      // Group by day for multi-day
+      return bounceRateTrend.map(item => ({
+        date: new Date(item.date),
+        bounce: item.bounceSessions,
+        nonBounce: item.totalSessions - item.bounceSessions,
+      }));
+    }
+  }, [bounceRateTrend, startDate, endDate]);
 
   useEffect(() => {
     if (selectedMetric === 'visitors') {
@@ -340,7 +363,7 @@ export function AnalyticsDashboard() {
         loading || trendLoading ? (
           <div className="h-80 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div>
         ) : (
-          <SimpleLineChart data={bounceRateChartData} title="Bounce Rate" />
+          <StackedBarChart data={bounceRateStackedBarData} title="Bounce vs Non-Bounce Sessions" />
         )
       ),
     },
