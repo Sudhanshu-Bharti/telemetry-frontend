@@ -1,19 +1,11 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { Layout } from "./components/ui/Layout";
+import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/analytics" replace />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
-      </Routes>
-    </Router>
+    <Layout>
+      <AnalyticsDashboard />
+    </Layout>
   );
 }
 
