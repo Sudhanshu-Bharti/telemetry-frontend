@@ -26,7 +26,7 @@ export function SimpleLineChart({ data }: SimpleLineChartProps) {
   const formattedData = data.map((item) => ({
     ...item,
     displayDate: format(item.date, "MMM d"),
-    formattedValue: item.value.toLocaleString(),
+    formattedValue: (item.value ?? 0).toLocaleString(),
   }));
 
   return (

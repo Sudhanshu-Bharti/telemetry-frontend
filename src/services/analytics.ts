@@ -53,6 +53,30 @@ export interface UniqueVisitorsData {
   uniqueVisitors: number;
 }
 
+export interface BounceRateData {
+  bounceRate: number;
+}
+
+export interface AvgSessionDurationData {
+  averageSessionDuration: number;
+}
+
+export interface RealtimeMetricsData {
+  activeVisitors: number;
+  pageviewsLast24h: number;
+  topPagesRealTime: any[];
+}
+
+export interface VisitorsTrendData {
+  date: string;
+  uniqueVisitors: number;
+}
+
+export interface BounceRateTrendData {
+  date: string;
+  bounceRate: number;
+}
+
 export class AnalyticsService {
   private baseUrl: string;
 
@@ -149,6 +173,62 @@ export class AnalyticsService {
       siteId,
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString(),
+    });
+  }
+
+  async getBounceRate(
+    siteId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<BounceRateData> {
+    return this.fetchWithParams("/bounce-rate", {
+      siteId,
+      startDate: startDate.toISOString().slice(0, 10),
+      endDate: endDate.toISOString().slice(0, 10),
+    });
+  }
+
+  async getAvgSessionDuration(
+    siteId: string,
+    startDate: Date,
+    endDate: Date
+  ): Promise<AvgSessionDurationData> {
+    return this.fetchWithParams("/session-duration", {
+      siteId,
+      startDate: startDate.toISOString().slice(0, 10),
+      endDate: endDate.toISOString().slice(0, 10),
+    });
+  }
+
+  async getRealtimeMetrics(siteId: string): Promise<RealtimeMetricsData> {
+    return this.fetchWithParams("/realtime", { siteId });
+  }
+
+  async getVisitorsTrend(
+    siteId: string,
+    startDate: Date,
+    endDate: Date,
+    interval: 'day' | 'hour' = 'day'
+  ): Promise<VisitorsTrendData[]> {
+    return this.fetchWithParams("/visitors-trend", {
+      siteId,
+      startDate: startDate.toISOString().slice(0, 10),
+      endDate: endDate.toISOString().slice(0, 10),
+      interval,
+    });
+  }
+
+  async getBounceRateTrend(
+    siteId: string,
+    startDate: Date,
+    endDate: Date,
+    interval: 'day' | 'hour' = 'day'
+  ): Promise<BounceRateTrendData[]> {
+    return this.fetchWithParams("/bounce-rate-trend", {
+      siteId,
+      startDate: startDate.toISOString().slice(0, 10),
+      endDate: endDate.toISOString().slice(0, 10),
+      interval,
     });
   }
 }
