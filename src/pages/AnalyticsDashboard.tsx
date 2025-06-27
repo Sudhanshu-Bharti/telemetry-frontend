@@ -7,14 +7,12 @@ import {
   type UniqueVisitorsData,
   type TopPageData,
   type ReferrerData,
-  type BrowserStatsData,
   type CountryData,
-  type BounceRateData,
-  type AvgSessionDurationData,
   type RealtimeMetricsData,
   type VisitorsTrendData,
   type BounceRateTrendData,
 } from "../services/analytics";
+
 import { DateRangePicker } from "../components/DateRangePickerModern";
 import { StatCard } from "../components/ui/StatCard";
 import { Eye, Users, AlertTriangle, Clock } from "lucide-react";
@@ -37,6 +35,51 @@ const formatChange = (value: number): string => {
   const sign = value >= 0 ? '+' : '';
   return `${sign}${value.toFixed(1)}%`;
 };
+
+interface SimpleTabsProps {
+  tabs: any[];
+  initialTab?: string;
+  value?: string;
+  onChange?: (tabId: string) => void;
+}
+
+function SimpleTabs({ tabs, initialTab, value, onChange }: SimpleTabsProps) {
+  const [internalTab, setInternalTab] = useState(initialTab || tabs[0]?.id);
+  const activeTab = value !== undefined ? value : internalTab;
+
+  const setActiveTab = (tabId: string) => {
+    if (onChange) onChange(tabId);
+    if (value === undefined) setInternalTab(tabId);
+  };
+
+  const activeContent = tabs.find(tab => tab.id === activeTab)?.content;
+
+  return (
+    <div>
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={
+                (tab.id === activeTab
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300') +
+                ' whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors'
+              }
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+      <div className="pt-6">
+        {activeContent}
+      </div>
+    </div>
+  );
+}
 
 export function AnalyticsDashboard() {
   // State for date range
@@ -266,6 +309,43 @@ export function AnalyticsDashboard() {
     }
   }, [visitorsTrend, selectedMetric]);
 
+  // Main metric chart tabs
+  const METRIC_TABS = [
+    {
+      id: 'pageviews',
+      label: 'Pageviews',
+      content: (
+        loading || trendLoading ? (
+          <div className="h-80 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div>
+        ) : (
+          <SimpleLineChart data={pageviewsChartData} title="Page Views" />
+        )
+      ),
+    },
+    {
+      id: 'visitors',
+      label: 'Visitors',
+      content: (
+        loading || trendLoading ? (
+          <div className="h-80 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div>
+        ) : (
+          <SimpleLineChart data={visitorsChartData} title="Visitors" />
+        )
+      ),
+    },
+    {
+      id: 'bounceRate',
+      label: 'Bounce Rate',
+      content: (
+        loading || trendLoading ? (
+          <div className="h-80 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div>
+        ) : (
+          <SimpleLineChart data={bounceRateChartData} title="Bounce Rate" />
+        )
+      ),
+    },
+  ];
+
   const TABS = [
     // { id: 'overview', label: 'Page Views', content: <SimpleLineChart data={lineChartData} title="Page Views" /> },
     { id: 'pages', label: 'Top Pages', content: <HorizontalBarChart data={topPagesChartData} title="Top Pages" /> },
@@ -313,55 +393,14 @@ export function AnalyticsDashboard() {
           <StatCard title="Avg. Session" value={loading ? "..." : (typeof avgSessionDurationValue === 'number' && !isNaN(avgSessionDurationValue) ? formatTime(avgSessionDurationValue) : '—')} icon={<Clock size={16} />} />
         </div>
         
-        {/* Metric Selector */}
-        <div className="flex gap-2 mb-4">
-          <button
-            className={`px-4 py-2 rounded-lg text-sm font-medium border ${selectedMetric === 'pageviews' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
-            onClick={() => setSelectedMetric('pageviews')}
-          >
-            Pageviews
-          </button>
-          <button
-            className={`px-4 py-2 rounded-lg text-sm font-medium border ${selectedMetric === 'visitors' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
-            onClick={() => setSelectedMetric('visitors')}
-          >
-            Visitors
-          </button>
-          <button
-            className={`px-4 py-2 rounded-lg text-sm font-medium border ${selectedMetric === 'bounceRate' ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
-            onClick={() => setSelectedMetric('bounceRate')}
-          >
-            Bounce Rate
-          </button>
+        {/* Main Metric Tabs */}
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
+          <SimpleTabs tabs={METRIC_TABS} value={selectedMetric} onChange={(tabId) => setSelectedMetric(tabId as 'pageviews' | 'visitors' | 'bounceRate')} />
         </div>
 
-        {/* Main Chart */}
+        {/* Secondary Analytics Tabs */}
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
-          {loading || trendLoading ? (
-            <div className="h-80 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div>
-          ) : (
-            <SimpleLineChart
-              data={
-                selectedMetric === 'pageviews'
-                  ? pageviewsChartData
-                  : selectedMetric === 'visitors'
-                  ? visitorsChartData
-                  : bounceRateChartData
-              }
-              title={
-                selectedMetric === 'pageviews'
-                  ? 'Page Views'
-                  : selectedMetric === 'visitors'
-                  ? 'Visitors'
-                  : 'Bounce Rate'
-              }
-            />
-          )}
-        </div>
-
-        {/* Tabs for Page Views, Top Pages, Referrers, Audience */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
-          <Tabs tabs={TABS} />
+          <SimpleTabs tabs={TABS} />
         </div>
 
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
