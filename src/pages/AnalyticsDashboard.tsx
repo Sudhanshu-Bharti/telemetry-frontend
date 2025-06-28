@@ -22,6 +22,7 @@ import WorldMap from "../components/charts/WorldMap";
 import { CountryStats } from "../components/charts/CountryStats";
 import { getAlpha3 } from "../lib/alpha2toalpha3";
 import { LoadingSpinner } from "../components/ui/Card";
+import { useSite } from "../contexts/SiteContext";
 
 const formatTime = (seconds: number): string => {
   const m = Math.floor(seconds / 60);
@@ -82,12 +83,10 @@ function SimpleTabs({ tabs, initialTab, value, onChange }: SimpleTabsProps) {
 }
 
 export function AnalyticsDashboard() {
+  const { currentSiteId, currentSite, loading: siteLoading } = useSite();
   // State for date range
   const [startDate, setStartDate] = useState(() => startOfDay(subDays(new Date(), 7)));
   const [endDate, setEndDate] = useState(() => endOfDay(new Date()));
-
-  // State for site ID
-  const [siteId] = useState(config.defaultSiteId);
 
   // Loading and error states
   const [loading, setLoading] = useState(true);
@@ -122,7 +121,7 @@ export function AnalyticsDashboard() {
     let interval: NodeJS.Timeout;
     const fetchRealtime = async () => {
       try {
-        const data = await analyticsService.getRealtimeMetrics(siteId);
+        const data = await analyticsService.getRealtimeMetrics(currentSiteId);
         setRealtime(data);
       } catch (err) {
         // ignore
@@ -131,7 +130,7 @@ export function AnalyticsDashboard() {
     fetchRealtime();
     interval = setInterval(fetchRealtime, 10000);
     return () => clearInterval(interval);
-  }, [siteId]);
+  }, [currentSiteId]);
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -149,18 +148,18 @@ export function AnalyticsDashboard() {
           avgSessionDuration, prevAvgSessionDuration,
           pages, referrers, browsers, countries
         ] = await Promise.all([
-          analyticsService.getPageviews(siteId, startDate, endDate),
-          analyticsService.getPageviews(siteId, prevStartDate, prevEndDate),
-          analyticsService.getUniqueVisitors(siteId, startDate, endDate),
-          analyticsService.getUniqueVisitors(siteId, prevStartDate, prevEndDate),
-          analyticsService.getBounceRate(siteId, startDate, endDate),
-          analyticsService.getBounceRate(siteId, prevStartDate, prevEndDate),
-          analyticsService.getAvgSessionDuration(siteId, startDate, endDate),
-          analyticsService.getAvgSessionDuration(siteId, prevStartDate, prevEndDate),
-          analyticsService.getTopPages(siteId, startDate, endDate, 10),
-          analyticsService.getReferrers(siteId, startDate, endDate, 10),
-          analyticsService.getBrowserStats(siteId, startDate, endDate),
-          analyticsService.getCountries(siteId, startDate, endDate),
+          analyticsService.getPageviews(currentSiteId, startDate, endDate),
+          analyticsService.getPageviews(currentSiteId, prevStartDate, prevEndDate),
+          analyticsService.getUniqueVisitors(currentSiteId, startDate, endDate),
+          analyticsService.getUniqueVisitors(currentSiteId, prevStartDate, prevEndDate),
+          analyticsService.getBounceRate(currentSiteId, startDate, endDate),
+          analyticsService.getBounceRate(currentSiteId, prevStartDate, prevEndDate),
+          analyticsService.getAvgSessionDuration(currentSiteId, startDate, endDate),
+          analyticsService.getAvgSessionDuration(currentSiteId, prevStartDate, prevEndDate),
+          analyticsService.getTopPages(currentSiteId, startDate, endDate, 10),
+          analyticsService.getReferrers(currentSiteId, startDate, endDate, 10),
+          analyticsService.getBrowserStats(currentSiteId, startDate, endDate),
+          analyticsService.getCountries(currentSiteId, startDate, endDate),
         ]);
         setPageviewData(pageviews);
         setCurrentData({ pageviews, visitors, bounceRate, avgSessionDuration, pages, referrers, browsers, countries });
@@ -172,7 +171,7 @@ export function AnalyticsDashboard() {
       }
     };
     fetchAllData();
-  }, [startDate, endDate, siteId]);
+  }, [startDate, endDate, currentSiteId]);
 
   // Memoized calculations for display
   const {
@@ -271,10 +270,10 @@ export function AnalyticsDashboard() {
         try {
           const interval = isSameDay(startDate, endDate) ? 'hour' : 'day';
           if (selectedMetric === 'visitors') {
-            const data = await analyticsService.getVisitorsTrend(siteId, startDate, endDate, interval);
+            const data = await analyticsService.getVisitorsTrend(currentSiteId, startDate, endDate, interval);
             setVisitorsTrend(data);
           } else if (selectedMetric === 'bounceRate') {
-            const data = await analyticsService.getBounceRateTrend(siteId, startDate, endDate, interval);
+            const data = await analyticsService.getBounceRateTrend(currentSiteId, startDate, endDate, interval);
             setBounceRateTrend(data);
           }
         } catch (err) {
@@ -285,7 +284,7 @@ export function AnalyticsDashboard() {
       };
       fetchTrend();
     }
-  }, [selectedMetric, startDate, endDate, siteId]);
+  }, [selectedMetric, startDate, endDate, currentSiteId]);
 
   // Prepare chart data for each metric
   const pageviewsChartData = useMemo(() => lineChartData, [lineChartData]);

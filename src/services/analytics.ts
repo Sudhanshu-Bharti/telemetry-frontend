@@ -95,7 +95,9 @@ export class AnalyticsService {
       url.searchParams.append(key, value);
     });
 
-    const response = await fetch(url.toString());
+    const response = await fetch(url.toString(), {
+      credentials: 'include',
+    });
     if (!response.ok) {
       throw new Error(`Failed to fetch ${endpoint}: ${response.statusText}`);
     }
