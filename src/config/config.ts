@@ -1,6 +1,7 @@
 export const config = {
   // API configuration
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "http://localhost:8080",
+  basefrontend: import.meta.env.BETTER_AUTH_URL || "http://localhost:5173",
 
   // Default site ID - you should set this via environment variable
   defaultSiteId: import.meta.env.VITE_DEFAULT_SITE_ID || "default-site-id",

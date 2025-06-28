@@ -332,11 +332,23 @@ export function AnalyticsDashboard() {
     }
   }, [visitorsTrend, selectedMetric]);
 
+  // Tab icon helpers
+  const metricTabIcons = {
+    pageviews: <Eye size={18} className="mr-2 text-indigo-500" />,
+    visitors: <Users size={18} className="mr-2 text-teal-500" />,
+    bounceRate: <AlertTriangle size={18} className="mr-2 text-purple-500" />,
+  };
+  const secondaryTabIcons = {
+    pages: <Eye size={15} className="mr-2 text-indigo-400" />,
+    referrers: <Users size={15} className="mr-2 text-teal-400" />,
+    audience: <Clock size={15} className="mr-2 text-purple-400" />,
+  };
+
   // Main metric chart tabs
   const METRIC_TABS = [
     {
       id: 'pageviews',
-      label: 'Pageviews',
+      label: <span className="flex items-center font-semibold tracking-tight uppercase text-xs">{metricTabIcons.pageviews}Pageviews</span>,
       content: (
         loading || trendLoading ? (
           <div className="h-80 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div>
@@ -347,7 +359,7 @@ export function AnalyticsDashboard() {
     },
     {
       id: 'visitors',
-      label: 'Visitors',
+      label: <span className="flex items-center font-semibold tracking-tight uppercase text-xs">{metricTabIcons.visitors}Visitors</span>,
       content: (
         loading || trendLoading ? (
           <div className="h-80 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div>
@@ -358,7 +370,7 @@ export function AnalyticsDashboard() {
     },
     {
       id: 'bounceRate',
-      label: 'Bounce Rate',
+      label: <span className="flex items-center font-semibold tracking-tight uppercase text-xs">{metricTabIcons.bounceRate}Bounce Rate</span>,
       content: (
         loading || trendLoading ? (
           <div className="h-80 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div>
@@ -370,10 +382,9 @@ export function AnalyticsDashboard() {
   ];
 
   const TABS = [
-    // { id: 'overview', label: 'Page Views', content: <SimpleLineChart data={lineChartData} title="Page Views" /> },
-    { id: 'pages', label: 'Top Pages', content: <HorizontalBarChart data={topPagesChartData} title="Top Pages" /> },
-    { id: 'referrers', label: 'Referrers', content: <HorizontalBarChart data={referrersChartData} title="Referrers" /> },
-    { id: 'audience', label: 'Audience', content: (
+    { id: 'pages', label: <span className="flex items-center font-semibold tracking-tight uppercase text-xs">{secondaryTabIcons.pages}Top Pages</span>, content: <HorizontalBarChart data={topPagesChartData} title="Top Pages" /> },
+    { id: 'referrers', label: <span className="flex items-center font-semibold tracking-tight uppercase text-xs">{secondaryTabIcons.referrers}Referrers</span>, content: <HorizontalBarChart data={referrersChartData} title="Referrers" /> },
+    { id: 'audience', label: <span className="flex items-center font-semibold tracking-tight uppercase text-xs">{secondaryTabIcons.audience}Audience</span>, content: (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <SimpleBarChart data={browsersChartData} title="Browsers" />
         <SimpleBarChart data={osChartData} title="Operating Systems" />
@@ -383,68 +394,80 @@ export function AnalyticsDashboard() {
   ];
 
   if (error) {
-    return <div className="p-6 text-red-500">Error: {error}</div>;
+    return <div className="p-8 text-red-500 font-semibold text-lg">Error: {error}</div>;
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <header className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+    <div className="p-10 bg-white min-h-screen font-sans">
+      <header className="flex flex-col md:flex-row md:items-center md:justify-between mb-12 gap-6">
+        <div className="flex items-center gap-5">
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Dashboard</h1>
           {realtime ? (
-            <span className="ml-4 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+            <span className="ml-2 px-4 py-1.5 rounded-full bg-teal-50 text-teal-700 text-sm font-semibold shadow-sm border border-teal-100">
               {typeof realtime.activeVisitors === 'number' ? realtime.activeVisitors : '—'} active
             </span>
           ) : (
-            <span className="ml-4 px-3 py-1 rounded-full bg-gray-100 text-gray-400 text-xs font-semibold animate-pulse">
+            <span className="ml-2 px-4 py-1.5 rounded-full bg-gray-100 text-gray-400 text-sm font-semibold animate-pulse border border-gray-200 shadow-sm">
               ...
             </span>
           )}
         </div>
-        <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-          onDateChange={handleDateChange}
-        />
+        <div className="flex-shrink-0">
+          <DateRangePicker
+            startDate={startDate}
+            endDate={endDate}
+            onDateChange={handleDateChange}
+          />
+        </div>
       </header>
 
       <main>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard title="Views" value={loading ? "..." : (typeof totalPageviews === 'number' ? totalPageviews.toLocaleString() : '—')} change={formatChange(pageviewsChange)} trend={pageviewsChange >= 0 ? "up" : "down"} icon={<Eye size={16} />} />
-          <StatCard title="Visitors" value={loading ? "..." : (typeof totalVisitors === 'number' ? totalVisitors.toLocaleString() : '—')} change={formatChange(visitorsChange)} trend={visitorsChange >= 0 ? "up" : "down"} icon={<Users size={16} />} />
-          <StatCard title="Bounce Rate" value={loading ? "..." : (typeof bounceRateValue === 'number' && !isNaN(bounceRateValue) ? `${bounceRateValue.toFixed(1)}%` : '—')} icon={<AlertTriangle size={16} />} />
-          <StatCard title="Avg. Session" value={loading ? "..." : (typeof avgSessionDurationValue === 'number' && !isNaN(avgSessionDurationValue) ? formatTime(avgSessionDurationValue) : '—')} icon={<Clock size={16} />} />
-        </div>
-        
-        {/* Main Metric Tabs */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
-          <SimpleTabs tabs={METRIC_TABS} value={selectedMetric} onChange={(tabId) => setSelectedMetric(tabId as 'pageviews' | 'visitors' | 'bounceRate')} />
-        </div>
+        {/* Stat Cards */}
+        <section className="mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <StatCard title="Views" value={loading ? "..." : (typeof totalPageviews === 'number' ? totalPageviews.toLocaleString() : '—')} change={formatChange(pageviewsChange)} trend={pageviewsChange >= 0 ? "up" : "down"} icon={<Eye size={20} className="text-indigo-500" />} />
+            <StatCard title="Visitors" value={loading ? "..." : (typeof totalVisitors === 'number' ? totalVisitors.toLocaleString() : '—')} change={formatChange(visitorsChange)} trend={visitorsChange >= 0 ? "up" : "down"} icon={<Users size={20} className="text-teal-500" />} />
+            <StatCard title="Bounce Rate" value={loading ? "..." : (typeof bounceRateValue === 'number' && !isNaN(bounceRateValue) ? `${bounceRateValue.toFixed(1)}%` : '—')} icon={<AlertTriangle size={20} className="text-purple-500" />} />
+            <StatCard title="Avg. Session" value={loading ? "..." : (typeof avgSessionDurationValue === 'number' && !isNaN(avgSessionDurationValue) ? formatTime(avgSessionDurationValue) : '—')} icon={<Clock size={20} className="text-gray-700" />} />
+          </div>
+        </section>
+
+        {/* Main Metric Tabs + Chart */}
+        <section className="mb-12">
+          <div className="bg-gray-50 p-10 rounded-3xl border border-gray-100 shadow-md">
+            <SimpleTabs tabs={METRIC_TABS} value={selectedMetric} onChange={(tabId) => setSelectedMetric(tabId as 'pageviews' | 'visitors' | 'bounceRate')} />
+          </div>
+        </section>
 
         {/* Secondary Analytics Tabs */}
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm mb-8">
-          <SimpleTabs tabs={TABS} />
-        </div>
+        <section className="mb-12">
+          <div className="bg-gray-50 p-10 rounded-3xl border border-gray-100 shadow-md">
+            <SimpleTabs tabs={TABS} />
+          </div>
+        </section>
 
-        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <h3 className="text-base font-semibold text-gray-900 mb-4">Global View</h3>
-          {loading ? <div className="h-96 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div> : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <WorldMap
-                  data={countryMapData}
-                  hoveredCountry={hoveredCountry}
-                  onCountryHover={setHoveredCountry}
-                  selectedCountry={selectedCountry}
-                  onCountrySelect={setSelectedCountry}
-                />
+        {/* Global View */}
+        <section>
+          <div className="bg-gray-50 p-10 rounded-3xl border border-gray-100 shadow-md">
+            <h3 className="text-lg font-bold text-gray-900 mb-6 tracking-tight">Global View</h3>
+            {loading ? <div className="h-96 flex items-center justify-center"><LoadingSpinner className="h-8 w-8" /></div> : (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <div className="lg:col-span-2">
+                  <WorldMap
+                    data={countryMapData}
+                    hoveredCountry={hoveredCountry}
+                    onCountryHover={setHoveredCountry}
+                    selectedCountry={selectedCountry}
+                    onCountrySelect={setSelectedCountry}
+                  />
+                </div>
+                <div>
+                  <CountryStats data={countryStatsData} />
+                </div>
               </div>
-              <div>
-                <CountryStats data={countryStatsData} />
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </section>
       </main>
     </div>
   );
