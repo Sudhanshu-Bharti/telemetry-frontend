@@ -133,6 +133,7 @@ export function AnalyticsDashboard() {
   }, [currentSiteId]);
 
   useEffect(() => {
+    if (siteLoading || !currentSiteId) return;
     const fetchAllData = async () => {
       try {
         setLoading(true);
@@ -171,7 +172,7 @@ export function AnalyticsDashboard() {
       }
     };
     fetchAllData();
-  }, [startDate, endDate, currentSiteId]);
+  }, [startDate, endDate, currentSiteId, siteLoading]);
 
   // Memoized calculations for display
   const {

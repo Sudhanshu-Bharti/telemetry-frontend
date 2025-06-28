@@ -16,43 +16,55 @@ function AddSiteModal({ open, onClose, onAdd, loading, error }: {
   }, [open]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded shadow-lg p-6 w-full max-w-md relative">
-        <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600" onClick={onClose}>&times;</button>
-        <h2 className="text-lg font-semibold mb-4">Add a New Site</h2>
-        <form onSubmit={e => { e.preventDefault(); onAdd(site); }} className="flex flex-col gap-3">
-          <input
-            className="border rounded px-3 py-2 text-sm"
-            placeholder="Site ID (e.g. example.com)"
-            value={site.id}
-            onChange={e => setSite(s => ({ ...s, id: e.target.value }))}
-            required
-          />
-          <input
-            className="border rounded px-3 py-2 text-sm"
-            placeholder="Site Name"
-            value={site.name}
-            onChange={e => setSite(s => ({ ...s, name: e.target.value }))}
-            required
-          />
-          <input
-            className="border rounded px-3 py-2 text-sm"
-            placeholder="Domain URL (https://...)"
-            value={site.domainURL}
-            onChange={e => setSite(s => ({ ...s, domainURL: e.target.value }))}
-            required
-          />
-          {error && <div className="text-red-500 text-xs">{error}</div>}
-          <div className="flex gap-2 mt-2">
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded text-sm" disabled={loading}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+      <div className="bg-white border border-gray-200 rounded-lg p-6 w-full max-w-md relative animate-fade-in shadow-md">
+        <button className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl" onClick={onClose}>&times;</button>
+        <h2 className="text-xl font-semibold mb-1 text-gray-900 tracking-tight">Add a New Site</h2>
+        <p className="mb-5 text-gray-500 text-sm">Enter your site details to get started.</p>
+        <form onSubmit={e => { e.preventDefault(); onAdd(site); }} className="flex flex-col gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide">Site ID</label>
+            <input
+              className="border-0 border-b border-gray-300 focus:border-blue-600 focus:ring-0 px-0 py-2 w-full bg-transparent text-base placeholder-gray-400 transition"
+              placeholder="e.g. example.com"
+              value={site.id}
+              onChange={e => setSite(s => ({ ...s, id: e.target.value }))}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide">Site Name</label>
+            <input
+              className="border-0 border-b border-gray-300 focus:border-blue-600 focus:ring-0 px-0 py-2 w-full bg-transparent text-base placeholder-gray-400 transition"
+              placeholder="e.g. My Website"
+              value={site.name}
+              onChange={e => setSite(s => ({ ...s, name: e.target.value }))}
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide">Domain URL</label>
+            <input
+              className="border-0 border-b border-gray-300 focus:border-blue-600 focus:ring-0 px-0 py-2 w-full bg-transparent text-base placeholder-gray-400 transition"
+              placeholder="https://example.com"
+              value={site.domainURL}
+              onChange={e => setSite(s => ({ ...s, domainURL: e.target.value }))}
+              required
+            />
+          </div>
+          {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
+          <div className="flex gap-2 mt-3">
+            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold text-sm transition disabled:opacity-60" disabled={loading}>
               {loading ? 'Adding...' : 'Add Site'}
             </button>
-            <button type="button" className="text-gray-500 px-4 py-2 rounded text-sm" onClick={onClose}>
+            <button type="button" className="text-gray-500 hover:text-gray-700 px-4 py-2 rounded text-sm transition" onClick={onClose}>
               Cancel
             </button>
           </div>
         </form>
       </div>
+      <style>{`.animate-fade-in{animation:fadeIn .18s cubic-bezier(.4,0,.2,1)}`}
+      {`@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}`}</style>
     </div>
   );
 }
@@ -95,8 +107,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
       <>
         <AddSiteModal open={true} onClose={() => {}} onAdd={handleAddSite} loading={addLoading} error={addError} />
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-          <h1 className="text-2xl font-bold mb-2">Welcome!</h1>
-          <p className="mb-4 text-gray-600">You don't have any sites yet. Please add a site to get started.</p>
+          <h1 className="text-2xl font-bold mb-2 text-gray-900 tracking-tight">Welcome!</h1>
+          <p className="mb-4 text-gray-600 text-base">You don't have any sites yet. Please add a site to get started.</p>
         </div>
       </>
     );
@@ -120,7 +132,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
                 <span className="text-gray-400 text-sm">Loading sites...</span>
               ) : sites.length > 0 ? (
                 <select
-                  className="border rounded px-2 py-1 text-sm bg-white"
+                  className="border-0 border-b border-gray-300 rounded-none px-0 py-2 text-sm bg-white focus:ring-0 focus:border-blue-600 transition"
                   value={currentSite?.id || ''}
                   onChange={e => setCurrentSiteId(e.target.value)}
                 >
@@ -134,11 +146,11 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
                 <span className="text-gray-400 text-sm">No sites</span>
               )}
               <button
-                className="ml-2 text-blue-600 hover:text-blue-800 p-1"
+                className="ml-2 text-blue-600 hover:text-blue-800 p-1 rounded-full border border-blue-100 bg-blue-50 transition"
                 onClick={() => setShowAdd(v => !v)}
                 title="Add new site"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
               </button>
             </div>
             <a

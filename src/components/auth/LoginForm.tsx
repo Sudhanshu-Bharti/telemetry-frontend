@@ -55,7 +55,7 @@ export function LoginForm() {
     setError("");
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/sign-in/social`, {
+      const response = await fetch(`${config.apiBaseUrl}/api/auth/sign-in/social`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,53 +81,46 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto p-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Sign In</h2>
-        <p className="text-gray-600 mt-2">Welcome back to your dashboard</p>
+    <div className="w-full max-w-md mx-auto bg-white border border-gray-200 rounded-lg shadow-md p-8 mt-16 animate-fade-in">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Sign In</h2>
+        <p className="text-gray-500 mt-1 text-base">Welcome back to your dashboard</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm mb-2">
             {error}
           </div>
         )}
-
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
+          <label htmlFor="email" className="block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide">Email</label>
           <input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full border-0 border-b border-gray-300 focus:border-blue-600 focus:ring-0 px-0 py-2 bg-transparent text-base placeholder-gray-400 transition"
             placeholder="Enter your email"
           />
         </div>
-
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
+          <label htmlFor="password" className="block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide">Password</label>
           <input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full border-0 border-b border-gray-300 focus:border-blue-600 focus:ring-0 px-0 py-2 bg-transparent text-base placeholder-gray-400 transition"
             placeholder="Enter your password"
           />
         </div>
-
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition disabled:opacity-60 shadow-none"
         >
           {isLoading ? (
             <>
@@ -141,12 +134,12 @@ export function LoginForm() {
       </form>
 
       {/* Divider */}
-      <div className="relative my-6">
+      <div className="relative my-8">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
+          <div className="w-full border-t border-gray-200" />
         </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">Or continue with</span>
+        <div className="relative flex justify-center text-xs">
+          <span className="px-2 bg-white text-gray-400 uppercase tracking-wide">Or continue with</span>
         </div>
       </div>
 
@@ -156,7 +149,7 @@ export function LoginForm() {
         variant="outline"
         onClick={handleGitHubLogin}
         disabled={isGitHubLoading}
-        className="w-full"
+        className="w-full border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-800 font-semibold py-2 rounded transition shadow-none"
       >
         {isGitHubLoading ? (
           <>
@@ -171,14 +164,14 @@ export function LoginForm() {
         )}
       </Button>
 
-      <div className="mt-6 text-center">
+      <div className="mt-8 text-center">
         <p className="text-sm text-gray-600">
-          Don't have an account?{" "}
-          <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
-            Sign up
-          </a>
+          Don't have an account?{' '}
+          <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500 transition">Sign up</a>
         </p>
       </div>
-    </Card>
+      <style>{`.animate-fade-in{animation:fadeIn .18s cubic-bezier(.4,0,.2,1)}`}
+      {`@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}`}</style>
+    </div>
   );
 } 
