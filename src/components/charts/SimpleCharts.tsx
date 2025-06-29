@@ -26,11 +26,80 @@ interface SimpleLineChartProps {
 }
 
 export function SimpleLineChart({ data }: SimpleLineChartProps) {
+  // Determine granularity based on data distribution
+  const getDateGranularity = () => {
+    if (data.length === 0) return "day";
+
+    // Check if all dates are on the same day (hourly data)
+    const isHourly = data.every(
+      (d, i) =>
+        i === 0 ||
+        (d.date.getFullYear() === data[0].date.getFullYear() &&
+          d.date.getMonth() === data[0].date.getMonth() &&
+          d.date.getDate() === data[0].date.getDate())
+    );
+
+    if (isHourly) return "hour";
+
+    // Check if data spans more than 90 days
+    const firstDate = data[0].date;
+    const lastDate = data[data.length - 1].date;
+    const daysDiff =
+      Math.abs(lastDate.getTime() - firstDate.getTime()) /
+      (1000 * 60 * 60 * 24);
+
+    if (daysDiff > 365) return "month";
+    if (daysDiff > 90) return "week";
+    return "day";
+  };
+
+  const granularity = getDateGranularity();
+
+  // Smart tick interval calculation based on data length
+  const getTickInterval = (dataLength: number) => {
+    if (dataLength <= 7) return 0; // Show all ticks
+    if (dataLength <= 14) return 1; // Show every other
+    if (dataLength <= 30) return Math.ceil(dataLength / 7); // ~7 ticks
+    if (dataLength <= 90) return Math.ceil(dataLength / 6); // ~6 ticks
+    return Math.ceil(dataLength / 5); // ~5 ticks for very large ranges
+  };
+
+  const getDateFormat = (granularity: string) => {
+    switch (granularity) {
+      case "hour":
+        return "ha";
+      case "week":
+        return "MMM d";
+      case "month":
+        return "MMM yyyy";
+      default:
+        return "MMM d";
+    }
+  };
+
+  const getFullDateFormat = (granularity: string) => {
+    switch (granularity) {
+      case "hour":
+        return "ha";
+      case "week":
+        return "MMM d, yyyy";
+      case "month":
+        return "MMM yyyy";
+      default:
+        return "MMM d, yyyy";
+    }
+  };
+
   const formattedData = data.map((item) => ({
     ...item,
-    displayDate: format(item.date, "MMM d"),
+    displayDate: format(item.date, getDateFormat(granularity))
+      .replace("AM", "am")
+      .replace("PM", "pm"),
+    fullDate: format(item.date, getFullDateFormat(granularity)),
     formattedValue: (item.value ?? 0).toLocaleString(),
   }));
+
+  const tickInterval = getTickInterval(formattedData.length);
 
   return (
     <div className="bg-white border border-gray-100 rounded-lg p-6">
@@ -46,6 +115,10 @@ export function SimpleLineChart({ data }: SimpleLineChartProps) {
               tickLine={false}
               tick={{ fontSize: 11, fill: "#64748b", fontWeight: 400 }}
               className="text-xs"
+              interval={tickInterval}
+              angle={formattedData.length > 30 ? -45 : 0}
+              textAnchor={formattedData.length > 30 ? "end" : "middle"}
+              height={formattedData.length > 30 ? 60 : 30}
             />
             <YAxis
               axisLine={false}
@@ -64,7 +137,10 @@ export function SimpleLineChart({ data }: SimpleLineChartProps) {
                 color: "#1e293b",
               }}
               formatter={(value) => [value, "Views"]}
-              labelFormatter={(label) => `${label}`}
+              labelFormatter={(label, payload) => {
+                const item = payload?.[0]?.payload;
+                return item?.fullDate || label;
+              }}
             />
             <Line
               type="monotone"
@@ -670,23 +746,95 @@ interface StackedBarChartProps {
 }
 
 export function StackedBarChart({ data, title }: StackedBarChartProps) {
-  // Detect if all dates are the same day (hourly data)
-  const isHourly = data.length > 0 && data.every(d =>
-    d.date.getFullYear() === data[0].date.getFullYear() &&
-    d.date.getMonth() === data[0].date.getMonth() &&
-    d.date.getDate() === data[0].date.getDate()
-  );
+  // Determine granularity based on data distribution
+  const getDateGranularity = () => {
+    if (data.length === 0) return "day";
+
+    // Check if all dates are on the same day (hourly data)
+    const isHourly = data.every(
+      (d) =>
+        d.date.getFullYear() === data[0].date.getFullYear() &&
+        d.date.getMonth() === data[0].date.getMonth() &&
+        d.date.getDate() === data[0].date.getDate()
+    );
+
+    if (isHourly) return "hour";
+
+    // Check if data spans more than 90 days
+    const firstDate = data[0].date;
+    const lastDate = data[data.length - 1].date;
+    const daysDiff =
+      Math.abs(lastDate.getTime() - firstDate.getTime()) /
+      (1000 * 60 * 60 * 24);
+
+    if (daysDiff > 365) return "month";
+    if (daysDiff > 90) return "week";
+    return "day";
+  };
+
+  const granularity = getDateGranularity();
+
+  // Smart tick interval calculation based on data length
+  const getTickInterval = (dataLength: number) => {
+    if (dataLength <= 7) return 0; // Show all ticks
+    if (dataLength <= 14) return 1; // Show every other
+    if (dataLength <= 30) return Math.ceil(dataLength / 7); // ~7 ticks
+    if (dataLength <= 90) return Math.ceil(dataLength / 6); // ~6 ticks
+    return Math.ceil(dataLength / 5); // ~5 ticks for very large ranges
+  };
+
+  const getDateFormat = (granularity: string) => {
+    switch (granularity) {
+      case "hour":
+        return "ha";
+      case "week":
+        return "MMM d";
+      case "month":
+        return "MMM yyyy";
+      default:
+        return "MMM d";
+    }
+  };
+
+  const getFullDateFormat = (granularity: string) => {
+    switch (granularity) {
+      case "hour":
+        return "ha";
+      case "week":
+        return "MMM d, yyyy";
+      case "month":
+        return "MMM yyyy";
+      default:
+        return "MMM d, yyyy";
+    }
+  };
+
   const formattedData = data.map((item) => ({
     ...item,
-    displayDate: isHourly ? format(item.date, "haaa").replace(':00', '') : format(item.date, "MMM d"),
+    displayDate: format(item.date, getDateFormat(granularity))
+      .replace("AM", "am")
+      .replace("PM", "pm"),
+    fullDate: format(item.date, getFullDateFormat(granularity)),
   }));
+
+  const tickInterval = getTickInterval(formattedData.length);
 
   return (
     <div className="bg-white border border-gray-100 rounded-lg p-6">
-      {title && <h3 className="text-base font-semibold text-gray-900 mb-4">{title}</h3>}
+      {title && (
+        <h3 className="text-base font-semibold text-gray-900 mb-4">{title}</h3>
+      )}
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={formattedData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+          <BarChart
+            data={formattedData}
+            margin={{
+              top: 20,
+              right: 30,
+              left: 20,
+              bottom: formattedData.length > 30 ? 60 : 20,
+            }}
+          >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="displayDate"
@@ -694,6 +842,10 @@ export function StackedBarChart({ data, title }: StackedBarChartProps) {
               tickLine={false}
               tick={{ fontSize: 11, fill: "#64748b", fontWeight: 400 }}
               className="text-xs"
+              interval={tickInterval}
+              angle={formattedData.length > 30 ? -45 : 0}
+              textAnchor={formattedData.length > 30 ? "end" : "middle"}
+              height={formattedData.length > 30 ? 60 : 30}
             />
             <YAxis
               axisLine={false}
@@ -711,11 +863,26 @@ export function StackedBarChart({ data, title }: StackedBarChartProps) {
                 fontSize: "12px",
                 color: "#1e293b",
               }}
-              formatter={(value, name) => [value, name === "bounce" ? "Bounce Sessions" : "Non-Bounce Sessions"]}
-              labelFormatter={(label) => `${label}`}
+              formatter={(value, name) => {
+                if (name === "bounce") {
+                  return [value, "Bounce Sessions"];
+                } else if (name === "nonBounce") {
+                  return [value, "Non-Bounce Sessions"];
+                }
+                return [value, name];
+              }}
+              labelFormatter={(label, payload) => {
+                const item = payload?.[0]?.payload;
+                return item?.fullDate || label;
+              }}
             />
-            <Bar dataKey="bounce" stackId="a" fill="#B89DFB" name="Bounce Sessions" />
-            <Bar dataKey="nonBounce" stackId="a" fill="#e7deff" name="Non-Bounce Sessions" />
+            <Bar dataKey="bounce" stackId="a" fill="#8B5CF6" name="bounce" />
+            <Bar
+              dataKey="nonBounce"
+              stackId="a"
+              fill="#C4B5FD"
+              name="nonBounce"
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>

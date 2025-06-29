@@ -1,9 +1,33 @@
 import React, { useState } from "react";
-import { MoreHorizontal, Settings, User, LogOut, Plus } from "lucide-react";
+import { Settings, User, LogOut, Plus } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSite } from "../../contexts/SiteContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./dialog";
+import { Button } from "./button";
+import { Input } from "./input";
+import { Label } from "./label";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./select";
 
-function AddSiteModal({ open, onClose, onAdd, loading, error }: {
+function AddSiteModal({
+  open,
+  onClose,
+  onAdd,
+  loading,
+  error,
+}: {
   open: boolean;
   onClose: () => void;
   onAdd: (site: { id: string; name: string; domainURL: string }) => void;
@@ -14,58 +38,99 @@ function AddSiteModal({ open, onClose, onAdd, loading, error }: {
   React.useEffect(() => {
     if (!open) setSite({ id: "", name: "", domainURL: "" });
   }, [open]);
-  if (!open) return null;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onAdd(site);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="bg-white border border-gray-200 rounded-lg p-6 w-full max-w-md relative animate-fade-in shadow-md">
-        <button className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl" onClick={onClose}>&times;</button>
-        <h2 className="text-xl font-semibold mb-1 text-gray-900 tracking-tight">Add a New Site</h2>
-        <p className="mb-5 text-gray-500 text-sm">Enter your site details to get started.</p>
-        <form onSubmit={e => { e.preventDefault(); onAdd(site); }} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide">Site ID</label>
-            <input
-              className="border-0 border-b border-gray-300 focus:border-blue-600 focus:ring-0 px-0 py-2 w-full bg-transparent text-base placeholder-gray-400 transition"
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="bg-white border border-slate-200 max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
+            Add a New Site
+          </DialogTitle>
+          <p className="text-sm text-slate-600 mt-2">
+            Enter your site details to get started.
+          </p>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          <div className="space-y-2">
+            <Label
+              htmlFor="siteId"
+              className="text-xs font-bold text-slate-700 uppercase tracking-wide"
+            >
+              Site ID
+            </Label>
+            <Input
+              id="siteId"
+              className="border-slate-200 focus:border-slate-900 transition-colors"
               placeholder="e.g. example.com"
               value={site.id}
-              onChange={e => setSite(s => ({ ...s, id: e.target.value }))}
+              onChange={(e) => setSite((s) => ({ ...s, id: e.target.value }))}
               required
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide">Site Name</label>
-            <input
-              className="border-0 border-b border-gray-300 focus:border-blue-600 focus:ring-0 px-0 py-2 w-full bg-transparent text-base placeholder-gray-400 transition"
+          <div className="space-y-2">
+            <Label
+              htmlFor="siteName"
+              className="text-xs font-bold text-slate-700 uppercase tracking-wide"
+            >
+              Site Name
+            </Label>
+            <Input
+              id="siteName"
+              className="border-slate-200 focus:border-slate-900 transition-colors"
               placeholder="e.g. My Website"
               value={site.name}
-              onChange={e => setSite(s => ({ ...s, name: e.target.value }))}
+              onChange={(e) => setSite((s) => ({ ...s, name: e.target.value }))}
               required
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1 uppercase tracking-wide">Domain URL</label>
-            <input
-              className="border-0 border-b border-gray-300 focus:border-blue-600 focus:ring-0 px-0 py-2 w-full bg-transparent text-base placeholder-gray-400 transition"
+          <div className="space-y-2">
+            <Label
+              htmlFor="domainURL"
+              className="text-xs font-bold text-slate-700 uppercase tracking-wide"
+            >
+              Domain URL
+            </Label>
+            <Input
+              id="domainURL"
+              className="border-slate-200 focus:border-slate-900 transition-colors"
               placeholder="https://example.com"
               value={site.domainURL}
-              onChange={e => setSite(s => ({ ...s, domainURL: e.target.value }))}
+              onChange={(e) =>
+                setSite((s) => ({ ...s, domainURL: e.target.value }))
+              }
               required
             />
           </div>
-          {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
-          <div className="flex gap-2 mt-3">
-            <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold text-sm transition disabled:opacity-60" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Site'}
-            </button>
-            <button type="button" className="text-gray-500 hover:text-gray-700 px-4 py-2 rounded text-sm transition" onClick={onClose}>
+          {error && (
+            <div className="text-red-600 text-sm font-medium bg-red-50 border border-red-200 p-3">
+              {error}
+            </div>
+          )}
+          <div className="flex gap-3 pt-4">
+            <Button
+              type="submit"
+              className="bg-slate-900 hover:bg-slate-800 text-white font-bold transition-colors"
+              disabled={loading}
+            >
+              {loading ? "Adding..." : "Add Site"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="border-slate-200 hover:bg-slate-50 text-slate-700 font-medium"
+              onClick={onClose}
+            >
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
-      <style>{`.animate-fade-in{animation:fadeIn .18s cubic-bezier(.4,0,.2,1)}`}
-      {`@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}`}</style>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -73,17 +138,22 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { user, logout } = useAuth();
-  const { sites, currentSite, setCurrentSiteId, loading, addSite, hasSites } = useSite();
+  const { sites, currentSite, setCurrentSiteId, loading, addSite, hasSites } =
+    useSite();
   const [showAdd, setShowAdd] = useState(false);
   const [addError, setAddError] = useState("");
   const [addLoading, setAddLoading] = useState(false);
 
   const handleLogout = () => {
     logout();
-    window.location.href = '/login';
+    window.location.href = "/login";
   };
 
-  const handleAddSite = async (site: { id: string; name: string; domainURL: string }) => {
+  const handleAddSite = async (site: {
+    id: string;
+    name: string;
+    domainURL: string;
+  }) => {
     setAddError("");
     setAddLoading(true);
     try {
@@ -105,93 +175,156 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({
   if (!loading && !hasSites) {
     return (
       <>
-        <AddSiteModal open={true} onClose={() => {}} onAdd={handleAddSite} loading={addLoading} error={addError} />
+        <AddSiteModal
+          open={true}
+          onClose={() => {}}
+          onAdd={handleAddSite}
+          loading={addLoading}
+          error={addError}
+        />
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-          <h1 className="text-2xl font-bold mb-2 text-gray-900 tracking-tight">Welcome!</h1>
-          <p className="mb-4 text-gray-600 text-base">You don't have any sites yet. Please add a site to get started.</p>
+          <h1 className="text-2xl font-bold mb-2 text-gray-900 tracking-tight">
+            Welcome!
+          </h1>
+          <p className="mb-4 text-gray-600 text-base">
+            You don't have any sites yet. Please add a site to get started.
+          </p>
         </div>
       </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <AddSiteModal open={showAdd} onClose={() => setShowAdd(false)} onAdd={handleAddSite} loading={addLoading} error={addError} />
-      <nav className="w-full border-b border-gray-100 bg-white px-4 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50">
+      <AddSiteModal
+        open={showAdd}
+        onClose={() => setShowAdd(false)}
+        onAdd={handleAddSite}
+        loading={addLoading}
+        error={addError}
+      />
+      <nav className="w-full border-b border-slate-200 bg-white px-8 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-black rounded-full"></div>
-            <span className="font-semibold text-lg text-black tracking-tight">
-              umami
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-slate-900 rounded-full"></div>
+            <span className="font-black text-xl text-slate-900 tracking-tight">
+              Analytics
             </span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-8">
             {/* Site Switcher */}
-            <div className="relative">
+            <div className="flex items-center gap-3">
               {loading ? (
-                <span className="text-gray-400 text-sm">Loading sites...</span>
+                <span className="text-slate-400 text-sm font-medium">
+                  Loading sites...
+                </span>
               ) : sites.length > 0 ? (
-                <select
-                  className="border-0 border-b border-gray-300 rounded-none px-0 py-2 text-sm bg-white focus:ring-0 focus:border-blue-600 transition"
-                  value={currentSite?.id || ''}
-                  onChange={e => setCurrentSiteId(e.target.value)}
+                <Select
+                  value={currentSite?.id || ""}
+                  onValueChange={setCurrentSiteId}
                 >
-                  {sites.map(site => (
-                    <option key={site.id} value={site.id}>
-                      {site.name} ({site.id})
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-64 border-slate-200 focus:border-slate-900 transition-colors">
+                    <SelectValue placeholder="Select a site" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200">
+                    {sites.map((site) => (
+                      <SelectItem
+                        key={site.id}
+                        value={site.id}
+                        className="hover:bg-slate-50"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-medium text-slate-900">
+                            {site.name}
+                          </span>
+                          <span className="text-xs text-slate-500">
+                            {site.id}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               ) : (
-                <span className="text-gray-400 text-sm">No sites</span>
+                <span className="text-slate-400 text-sm font-medium">
+                  No sites
+                </span>
               )}
-              <button
-                className="ml-2 text-blue-600 hover:text-blue-800 p-1 rounded-full border border-blue-100 bg-blue-50 transition"
-                onClick={() => setShowAdd(v => !v)}
-                title="Add new site"
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-slate-200 hover:bg-slate-50 text-slate-700 font-medium"
+                onClick={() => setShowAdd(true)}
               >
-                <Plus className="w-5 h-5" />
-              </button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Site
+              </Button>
             </div>
-            <a
-              href="#"
-              className="text-gray-900 text-sm font-medium hover:text-gray-600 transition-colors"
-            >
-              Dashboard
-            </a>
-            <a
-              href="#"
-              className="text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors"
-            >
-              Realtime
-            </a>
+            <div className="flex items-center gap-6">
+              <a
+                href="#"
+                className="text-slate-900 text-sm font-bold hover:text-slate-600 transition-colors border-b-2 border-slate-900 pb-1"
+              >
+                Dashboard
+              </a>
+              <a
+                href="#"
+                className="text-slate-500 text-sm font-medium hover:text-slate-700 transition-colors"
+              >
+                Realtime
+              </a>
+              <a
+                href="#"
+                className="text-slate-500 text-sm font-medium hover:text-slate-700 transition-colors"
+              >
+                Reports
+              </a>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           {user && (
-            <div className="flex items-center gap-3 mr-4">
-              <span className="text-sm text-gray-700">Welcome, {user.name}</span>
+            <div className="flex items-center gap-4 mr-2">
+              <span className="text-sm font-medium text-slate-700">
+                Welcome, {user.name}
+              </span>
             </div>
           )}
-          <button className="text-gray-400 hover:text-gray-600 p-2 rounded-md transition-colors">
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-          <button className="text-gray-400 hover:text-gray-600 p-2 rounded-md transition-colors">
-            <Settings className="w-4 h-4" />
-          </button>
-          <button className="text-gray-400 hover:text-gray-600 p-2 rounded-md transition-colors">
-            <User className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="text-gray-400 hover:text-red-600 p-2 rounded-md transition-colors"
-            title="Logout"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-slate-200 hover:bg-slate-50"
+              >
+                <User className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="bg-white border-slate-200 w-48"
+              align="end"
+            >
+              <DropdownMenuItem className="hover:bg-slate-50 cursor-pointer">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuItem className="hover:bg-slate-50 cursor-pointer">
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-slate-200" />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="hover:bg-red-50 cursor-pointer text-red-600 focus:text-red-600"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </nav>
-      <main className="bg-white">{children}</main>
+      <main className="bg-slate-50">{children}</main>
     </div>
   );
 };
