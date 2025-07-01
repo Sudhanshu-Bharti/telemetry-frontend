@@ -6,6 +6,7 @@ import { Layout } from "./components/ui/Layout";
 import { AnalyticsDashboard } from "./pages/AnalyticsDashboard";
 import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
+import LandingPage from "./pages/LandingPage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Router>
           <Routes>
             {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
             
@@ -28,9 +30,6 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            
-            {/* Redirect root to analytics */}
-            <Route path="/" element={<Navigate to="/analytics" replace />} />
             
             {/* Catch all route */}
             <Route path="*" element={<Navigate to="/analytics" replace />} />
